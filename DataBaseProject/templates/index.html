@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Companies{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">Companies</h2>
+</div>
+
+<div class="company-cards">
+    {% for company in companies %}
+    <div class="company-card">
+        <h3>{{ company.CompanyName }}</h3>
+        <p><strong>Manager:</strong> {{ company.CEO }}</p>
+        <p><strong>City:</strong> {{ company.City }}</p>
+        <p><strong>Address:</strong> {{ company.Address }}</p>
+        <div class="card-actions">
+            <a href="/branch/{{ company.CompanyId }}" class="btn view-btn">Select</a>
+            <button class="btn edit-btn" onclick="openEditCompanyModal(
+                '{{ company.CompanyId }}',
+                '{{ company.CompanyName }}',
+                '{{ company.CEO }}',
+                '{{ company.City }}',
+                '{{ company.Address }}',
+                '{{ company.FoundedYear }}',
+                '{{ company.Website }}'
+            )">Edit</button>
+            <a href="/delete_company/{{ company.CompanyId }}" class="btn delete-btn">Delete</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div id="editCompanyModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditCompanyModal()">&times;</span>
+        <h3>Edit Company</h3>
+        <form method="POST" action="/edit_company">
+            <input type="hidden" name="company_id" id="editCompanyId">
+            <label>Branch Name:</label>
+            <input type="text" name="company_name" id="editCompanyName" required><br>
+            <label>Manager:</label>
+            <input type="text" name="ceo" id="editCEO" required><br>
+            <label>City:</label>
+            <input type="text" name="city" id="editCity" required><br>
+            <label>Address:</label>
+            <input type="text" name="address" id="editAddress" required><br>
+            <label>Founded Year:</label>
+            <input type="number" name="founded_year" id="editFoundedYear" min="1900" max="2099" required><br>
+            <label>Website:</label>
+            <input type="url" name="website" id="editWebsite" required><br>
+            <button type="submit" class="btn save-btn">Save</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEditCompanyModal(id, name, ceo, city, address, foundedYear, website) {
+        document.getElementById('editCompanyId').value = id;
+        document.getElementById('editCompanyName').value = name;
+        document.getElementById('editCEO').value = ceo;
+        document.getElementById('editCity').value = city;
+        document.getElementById('editAddress').value = address;
+        document.getElementById('editFoundedYear').value = foundedYear;
+        document.getElementById('editWebsite').value = website;
+        document.getElementById('editCompanyModal').style.display = 'flex';
+    }
+
+    function closeEditCompanyModal() {
+        document.getElementById('editCompanyModal').style.display = 'none';
+    }
+
+    window.onclick = function (event) {
+        if (event.target.classList.contains('modal')) {
+            closeEditCompanyModal();
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %}Products - {{ branch.CompanyName }}{% endblock %}
+
+{% block content %}
+
+<head>
+    <script>
+        function openAddProductModal() {
+            document.getElementById('addProductModal').style.display = 'flex';
+        }
+
+        function closeAddProductModal() {
+            document.getElementById('addProductModal').style.display = 'none';
+        }
+
+        function openEditProductModal(id, name, category, costPrice, sellingPrice, discountRate, quantity, expirationDate, returnPolicy) {
+            document.getElementById('editProductId').value = id;
+            document.getElementById('editProductName').value = name;
+            document.getElementById('editCategory').value = category;
+            document.getElementById('editCostPrice').value = costPrice;
+            document.getElementById('editSellingPrice').value = sellingPrice;
+            document.getElementById('editDiscountRate').value = discountRate;
+            document.getElementById('editQuantityInStock').value = quantity;
+            document.getElementById('editExpirationDate').value = expirationDate;
+            document.getElementById('editReturnPolicy').value = returnPolicy;
+            document.getElementById('editProductModal').style.display = 'flex';
+        }
+
+        function closeEditProductModal() {
+            document.getElementById('editProductModal').style.display = 'none';
+        }
+
+        window.onclick = function (event) {
+            if (event.target.classList.contains('modal')) {
+                closeAddProductModal();
+                closeEditProductModal();
+            }
+        }
+    </script>
+</head>
+
+<div class="branch-container">
+    <aside class="sidebar">
+        <ul>
+            <li><a href="/branch/{{ branch.CompanyId }}">Dashboard</a></li>
+            <li><a href="/departments/{{ branch.CompanyId }}">Departments</a></li>
+            <li><a href="/products/{{ branch.CompanyId }}">Products</a></li>
+            <li><a href="/purchase/{{ branch.CompanyId }}">Purchases</a></li>
+            <li><a href="/sales/{{ branch.CompanyId }}">Sales</a></li>
+        </ul>
+        </ul>
+    </aside>
+
+    <main class="branch-main">
+        <div class="page-header1">
+            <h2 class="page-title">Products for {{ branch.CompanyName }}</h2>
+            <button class="btn add-btn" onclick="openAddProductModal()">+ Add Product</button>
+        </div>
+
+        <div class="search-container">
+            <label for="search-box">Search Products:</label>
+            <input type="text" id="search-box" placeholder="Type to search...">
+        </div>
+
+        <script>
+            document.getElementById('search-box').addEventListener('input', function () {
+                const searchValue = this.value.toLowerCase();
+                const rows = document.querySelectorAll('.styled-table tbody tr');
+
+                rows.forEach(row => {
+                    const productName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                    const category = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                    const costPrice = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+                    const sellingPrice = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+
+                    if (
+                        productName.includes(searchValue) ||
+                        category.includes(searchValue) ||
+                        costPrice.includes(searchValue) ||
+                        sellingPrice.includes(searchValue)
+                    ) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        </script>
+
+        <div class="table-container">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Product ID</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Cost Price</th>
+                        <th>Selling Price</th>
+                        <th>Discount Rate</th>
+                        <th>Quantity in Stock</th>
+                        <th>Expiration Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>{{ product.ProductId }}</td>
+                        <td>{{ product.ProductName }}</td>
+                        <td>{{ product.Category }}</td>
+                        <td>${{ product.CostPrice }}</td>
+                        <td>${{ product.SellingPrice }}</td>
+                        <td>{{ product.DiscountRate }}%</td>
+                        <td>{{ product.QuantityInStock }}</td>
+                        <td>{{ product.ExpirationDate }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn edit-btn" onclick="openEditProductModal(
+                                    '{{ product.ProductId }}',
+                                    '{{ product.ProductName }}',
+                                    '{{ product.Category }}',
+                                    '{{ product.CostPrice }}',
+                                    '{{ product.SellingPrice }}',
+                                    '{{ product.DiscountRate }}',
+                                    '{{ product.QuantityInStock }}',
+                                    '{{ product.ExpirationDate }}',
+                                    '{{ product.ReturnPolicy }}'
+                                )">Edit</button>
+                                <a href="/delete_product/{{ product.ProductId }}/{{ branch.CompanyId }}" class="btn delete-btn">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Add Product Modal -->
+        <div id="addProductModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeAddProductModal()">&times;</span>
+                <h3>Add Product</h3>
+                <form method="POST" action="/add_product/{{ branch.CompanyId }}">
+                    <label for="product_name">Product Name:</label>
+                    <input type="text" name="product_name" required><br>
+                    <label for="category">Category:</label>
+                    <input type="text" name="category" required><br>
+                    <label for="cost_price">Cost Price:</label>
+                    <input type="number" name="cost_price" min="0" required><br>
+                    <label for="selling_price">Selling Price:</label>
+                    <input type="number" name="selling_price" min="0" required><br>
+                    <label for="discount_rate">Discount Rate (%):</label>
+                    <input type="number" name="discount_rate" min="0" max="100" step="0.01"><br>
+                    <label for="quantity_in_stock">Quantity in Stock:</label>
+                    <input type="number" name="quantity_in_stock" min="0" required><br>
+                    <label for="expiration_date">Expiration Date:</label>
+                    <input type="date" name="expiration_date"><br>
+                    <label for="return_policy">Return Policy:</label>
+                    <input type="text" name="return_policy"><br>
+                    <button type="submit" class="btn save-btn">Add</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Product Modal -->
+        <div id="editProductModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeEditProductModal()">&times;</span>
+                <h3>Edit Product</h3>
+                <form method="POST" action="/edit_product">
+                    <input type="hidden" name="product_id" id="editProductId">
+                    <input type="hidden" name="company_id" value="{{ branch.CompanyId }}">
+                    
+                    <label for="product_name">Product Name:</label>
+                    <input type="text" name="product_name" id="editProductName" required><br>
+
+                    <label for="category">Category:</label>
+                    <input type="text" name="category" id="editCategory" required><br>
+
+                    <label for="cost_price">Cost Price:</label>
+                    <input type="number" name="cost_price" id="editCostPrice" min="0" required><br>
+
+                    <label for="selling_price">Selling Price:</label>
+                    <input type="number" name="selling_price" id="editSellingPrice" min="0" required><br>
+
+                    <label for="discount_rate">Discount Rate (%):</label>
+                    <input type="number" name="discount_rate" id="editDiscountRate" min="0" max="100" step="0.01"><br>
+
+                    <label for="quantity_in_stock">Quantity in Stock:</label>
+                    <input type="number" name="quantity_in_stock" id="editQuantityInStock" min="0" required><br>
+
+                    <label for="expiration_date">Expiration Date:</label>
+                    <input type="date" name="expiration_date" id="editExpirationDate"><br>
+
+                    <label for="return_policy">Return Policy:</label>
+                    <input type="text" name="return_policy" id="editReturnPolicy"><br>
+
+                    <button type="submit" class="btn save-btn">Save</button>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+{% endblock %}

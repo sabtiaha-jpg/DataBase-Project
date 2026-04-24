@@ -1,0 +1,611 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="dashboard-container">
+    <div class="tab-controls">
+        <h2 class="dashboard-title">Business Intelligence Dashboard</h2>
+        <div class="tab-btn-group">
+            <button class="tab-btn" onclick="toggleSection('companies')">Company Data</button>
+            <button class="tab-btn" onclick="toggleSection('revenue')">Revenue</button>
+            <button class="tab-btn" onclick="toggleSection('products')">Products</button>
+            <button class="tab-btn" onclick="toggleSection('employees')">Employees</button>
+            <button class="tab-btn" onclick="toggleSection('inventory')">Inventory</button>
+            <button class="tab-btn" onclick="toggleSection('sales')">Sales</button>
+            <button class="tab-btn" onclick="toggleSection('customers')">Customers</button>
+            <button class="tab-btn" onclick="toggleSection('suppliers')">Suppliers</button>
+            <button class="tab-btn" onclick="window.location.href='{{ url_for('employees_by_dept') }}'">Employees by Department</button>
+            <button class="tab-btn" onclick="window.location.href='{{ url_for('company_financials') }}'">Branch Financial Overview</button>
+
+        </div>
+    </div>
+    <div id="companies" class="report-section hidden">
+        <div class="card">
+            <h3 class="section-title">All Branches</h3>
+            <div class="table-wrapper">
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Branch Name</th>
+                            <th>CEO</th>
+                            <th>Founded Year</th>
+                            <th>City</th>
+                            <th>Address</th>
+                            <th>Website</th>
+                            <th># Employees</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for c in all_companies %}
+                        <tr>
+                            <td>{{ c.CompanyName }}</td>
+                            <td>{{ c.CEO }}</td>
+                            <td>{{ c.FoundedYear }}</td>
+                            <td>{{ c.City }}</td>
+                            <td>{{ c.Address }}</td>
+                            <td>{{ c.Website }}</td>
+                            <td>{{ c.NumberOfEmployees }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="revenue" class="report-section">
+        <div class="card">
+            <h3 class="section-title">Revenue Report</h3>
+            <div class="date-filter">
+                <form method="GET" action="/reporting">
+                    <label for="start_date">Start Date:</label>
+                    <input type="date" id="start_date" name="start_date" value="{{ start_date|default('') }}">
+                    <label for="end_date">End Date:</label>
+                    <input type="date" id="end_date" name="end_date" value="{{ end_date|default('') }}">
+                    <button type="submit" class="btn filter-btn">Apply</button>
+                </form>
+            </div>
+            <canvas id="revenue-chart" style="width:100%; height:300px;"></canvas>
+            <div class="table-wrapper">
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Branch</th>
+                            <th>Total Revenue</th>
+                            <th>Sales Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in revenues %}
+                        <tr>
+                            <td>{{ r.company_name }}</td>
+                            <td>${{ r.total_revenue }}</td>
+                            <td>{{ r.sales_count }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="products" class="report-section hidden">
+        <div class="card">
+            <h3 class="section-title">Top-Selling Products</h3>
+            <canvas id="top-products-chart" style="width:100%; height:300px;"></canvas>
+            <div class="table-wrapper">
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Sold Qty</th>
+                            <th>Total Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for p in top_products %}
+                        <tr>
+                            <td>{{ p.product_name }}</td>
+                            <td>{{ p.total_quantity }}</td>
+                            <td>${{ p.total_revenue }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="employees" class="report-section hidden">
+        <div class="card">
+            <h3 class="section-title">Employees Overview</h3>
+            <div class="table-wrapper">
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Position</th>
+                            <th>Branch</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for e in employees_detailed %}
+                        <tr>
+                            <td>{{ e.EmployeeName }}</td>
+                            <td>{{ e.Position }}</td>
+                            <td>{{ e.CompanyName }}</td>
+                            <td>{{ e.Email }}</td>
+                            <td>{{ e.PhoneNumber }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-stack">
+                <div>
+                    <h4>Recently Hired</h4>
+                    <table class="styled-table small-table">
+                        <thead><tr><th>ID</th><th>Name</th><th>Hire Date</th></tr></thead>
+                        <tbody>
+                        {% for h in recent_hires %}
+                            <tr>
+                                <td>{{ h.EmployeeId }}</td>
+                                <td>{{ h.Name }}</td>
+                                <td>{{ h.DateOfHire }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Repeat same .card pattern for the other report-sections ... -->
+    <!-- ...just as above, for inventory, sales, customers, suppliers -->
+
+    <div id="inventory" class="report-section hidden">
+        <div class="card">
+            <h3 class="section-title">Inventory & Product Status</h3>
+            <div class="table-stack">
+            <div>
+                <h4>Branch Inventory</h4>
+                <table class="styled-table small-table">
+                    <thead>
+                        <tr>
+                            <th>Branch</th>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for i in company_inventory %}
+                        <tr>
+                            <td>{{ i.CompanyName }}</td>
+                            <td>{{ i.ProductName }}</td>
+                            <td>{{ i.Quantity }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <h4>Inventory Value</h4>
+                <table class="styled-table small-table">
+                    <thead>
+                        <tr>
+                            <th>Branch</th>
+                            <th>Total Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for v in company_inventory_value %}
+                        <tr>
+                            <td>{{ v.CompanyName }}</td>
+                            <td>${{ v.InventoryValue }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            </div>
+            <div class="table-stack">
+                <div>
+                    <h4>Near Expiration</h4>
+                    <table class="styled-table small-table">
+                        <thead><tr><th>ID</th><th>Name</th><th>Expiration</th></tr></thead>
+                        <tbody>
+                        {% for p in expiring_products %}
+                            <tr>
+                                <td>{{ p.ProductId }}</td>
+                                <td>{{ p.ProductName }}</td>
+                                <td>{{ p.ExpirationDate }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h4>Out of Stock</h4>
+                    <table class="styled-table small-table">
+                        <thead><tr><th>ID</th><th>Name</th></tr></thead>
+                        <tbody>
+                        {% for p in out_of_stock %}
+                            <tr>
+                                <td>{{ p.ProductId }}</td>
+                                <td>{{ p.ProductName }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h4>By Category</h4>
+                    <table class="styled-table small-table">
+                        <thead><tr><th>Category</th><th>Count</th><th>Avg Price</th></tr></thead>
+                        <tbody>
+                        {% for c in products_by_category %}
+                            <tr>
+                                <td>{{ c.Category }}</td>
+                                <td>{{ c.NumProducts }}</td>
+                                <td>${{ c.AvgPrice }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sales" class="report-section hidden">
+        <div class="card">
+            <h3 class="section-title">Sales Insights</h3>
+            <div class="table-stack">
+                <div>
+                    <h4>Monthly Sales</h4>
+                    <table class="styled-table small-table">
+                        <thead><tr><th>Month</th><th>Revenue</th></tr></thead>
+                        <tbody>
+                        {% for s in sales_by_month %}
+                            <tr>
+                                <td>{{ s.SaleMonth }}</td>
+                                <td>${{ s.MonthlyRevenue }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h4>Revenue by Product</h4>
+                    <table class="styled-table small-table">
+                        <thead><tr><th>Product</th><th>Revenue</th></tr></thead>
+                        <tbody>
+                        {% for p in revenue_by_product %}
+                            <tr>
+                                <td>{{ p.ProductName }}</td>
+                                <td>${{ p.Revenue }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="customers" class="report-section hidden">
+        <div class="card">
+            <h3 class="section-title">Customer Activity</h3>
+            <div class="table-stack">
+                <div>
+                    <h4>Recent Orders</h4>
+                    <table class="styled-table small-table">
+                        <thead><tr><th>Customer</th><th>Sale ID</th><th>Date</th><th>Total</th></tr></thead>
+                        <tbody>
+                        {% for o in recent_orders %}
+                            <tr>
+                                <td>{{ o.CustomerName }}</td>
+                                <td>{{ o.SaleId }}</td>
+                                <td>{{ o.SaleDate }}</td>
+                                <td>${{ o.TotalRevenue }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h4>Spending Summary</h4>
+                    <table class="styled-table small-table">
+                        <thead><tr><th>Customer</th><th>Orders</th><th>Total Spent</th></tr></thead>
+                        <tbody>
+                        {% for c in customer_spending %}
+                            <tr>
+                                <td>{{ c.CustomerName }}</td>
+                                <td>{{ c.NumOrders }}</td>
+                                <td>${{ c.TotalSpent }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="suppliers" class="report-section hidden">
+        <div class="card">
+            <h3 class="section-title">Supplier Metrics</h3>
+            <div class="table-stack">
+                <div>
+                    <h4>Products Supplied</h4>
+                    <table class="styled-table small-table">
+                        <thead><tr><th>Supplier</th><th># Products</th></tr></thead>
+                        <tbody>
+                        {% for s in supplier_products %}
+                            <tr>
+                                <td>{{ s.SupplierCompany }}</td>
+                                <td>{{ s.ProductCount }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h4>Purchases Summary</h4>
+                    <table class="styled-table small-table">
+                        <thead><tr><th>Supplier</th><th># Purchases</th><th>Total Cost</th></tr></thead>
+                        <tbody>
+                        {% for p in supplier_purchases %}
+                            <tr>
+                                <td>{{ p.SupplierCompany }}</td>
+                                <td>{{ p.NumPurchases }}</td>
+                                <td>${{ p.TotalCost }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll('.report-section').forEach(function(section, idx) {
+        if(idx === 0) section.classList.remove('hidden');
+        else section.classList.add('hidden');
+    });
+});
+function toggleSection(id) {
+    document.querySelectorAll('.report-section').forEach(el => el.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+}
+const revenueLabels = [{% for r in revenues %}{% if not loop.first %}, {% endif %}"{{ r.company_name }}"{% endfor %}];
+const revenueData = [{% for r in revenues %}{% if not loop.first %}, {% endif %}{{ r.total_revenue|float }}{% endfor %}];
+new Chart(document.getElementById("revenue-chart").getContext("2d"), {
+    type: "bar",
+    data: {
+        labels: revenueLabels,
+        datasets: [{
+            label: "Total Revenue",
+            data: revenueData,
+            backgroundColor: "rgba(54, 162, 235, 0.5)",
+            borderColor: "rgba(54, 162, 235, 1)",
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            title: { display: true, text: "Revenue by Branch" }
+        }
+    }
+});
+const topProductsLabels = [{% for p in top_products %}{% if not loop.first %}, {% endif %}"{{ p.product_name }}"{% endfor %}];
+const topProductsData = [{% for p in top_products %}{% if not loop.first %}, {% endif %}{{ p.total_quantity|float }}{% endfor %}];
+new Chart(document.getElementById("top-products-chart").getContext("2d"), {
+    type: "bar",
+    data: {
+        labels: topProductsLabels,
+        datasets: [{
+            label: "Total Quantity Sold",
+            data: topProductsData,
+            backgroundColor: "rgba(255, 99, 132, 0.5)",
+            borderColor: "rgba(255, 99, 132, 1)",
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            title: { display: true, text: "Top-Selling Products" }
+        }
+    }
+});
+</script>
+
+<style>
+/* Main container for more whitespace */
+.dashboard-container {
+    max-width: 1300px;
+    margin: 30px auto;
+    padding: 0 24px 48px 24px;
+}
+
+/* Tab controls redesign */
+.tab-controls {
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.dashboard-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: #1e3a8a;
+    letter-spacing: 1px;
+}
+.tab-btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 6px;
+}
+.tab-btn {
+    background-color: #1e3a8a;
+    color: #fff;
+    font-size: 1.13rem;
+    font-weight: 600;
+    padding: 11px 38px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.07);
+    margin: 0;
+    transition: transform 0.13s, box-shadow 0.13s, background 0.16s;
+}
+.tab-btn:hover,
+.tab-btn:focus {
+    background: #264fa7;
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 6px 18px rgba(30,58,138,0.11);
+}
+
+/* Card UI for each report section */
+.card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 28px rgba(30,58,138,0.07);
+    padding: 38px 32px 30px 32px;
+    margin-bottom: 36px;
+}
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 16px;
+}
+
+/* Date filter form styling */
+.date-filter form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 25px;
+    background: #f3f6fa;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+.date-filter label {
+    font-weight: 500;
+    color: #1e3a8a;
+}
+.date-filter input[type="date"] {
+    border: 1px solid #cdd5e1;
+    border-radius: 7px;
+    padding: 5px 9px;
+    font-size: 1rem;
+    outline: none;
+    background: #fff;
+}
+.filter-btn {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 7px 18px;
+    font-size: 1rem;
+    margin-left: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.filter-btn:hover {
+    background: #1e40af;
+}
+
+/* Table area with subtle shadow and scrolling */
+.table-wrapper {
+    margin-top: 28px;
+    overflow-x: auto;
+}
+
+/* Table style */
+.styled-table {
+    border-collapse: collapse;
+    font-size: 1.08rem;
+    min-width: 520px;
+    width: 100%;
+    background: #f9fafb;
+    border-radius: 12px;
+    box-shadow: 0 1px 7px rgba(30,58,138,0.04);
+    overflow: hidden;
+    margin-bottom: 14px;
+}
+.styled-table thead tr {
+    background-color: #1e3a8a;
+    color: #ffffff;
+    text-align: left;
+    font-weight: bold;
+    font-size: 1.04rem;
+}
+.styled-table th, .styled-table td {
+    padding: 13px 16px;
+}
+.styled-table tbody tr {
+    border-bottom: 1px solid #e6e6e6;
+    transition: background 0.18s;
+}
+.styled-table tbody tr:hover {
+    background-color: #e3e9f8;
+}
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #1e3a8a;
+}
+
+/* Smaller table variant for table-stack columns */
+.small-table {
+    font-size: 0.97rem;
+    min-width: 280px;
+    margin-bottom: 0;
+}
+
+/* Layout for sub-tables side by side (on large screens) */
+.table-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 34px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.table-stack > div {
+    flex: 1 1 270px;
+}
+
+/* Responsive: Stack columns on smaller screens */
+@media (max-width: 900px) {
+    .table-stack {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .card {
+        padding: 18px 7px 18px 7px;
+    }
+    .dashboard-title {
+        font-size: 1.35rem;
+    }
+}
+
+.hidden { display: none !important; }
+
+</style>
+{% endblock %}

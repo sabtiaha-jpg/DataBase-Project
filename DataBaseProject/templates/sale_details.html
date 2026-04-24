@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Sale Details - Sale #{{ sale.SaleId }}{% endblock %}
+
+{% block content %}
+<div class="details-container">
+    <div class="details-header">
+        <h2>Sale Details</h2>
+        <p><strong>Sale ID:</strong> {{ sale.SaleId }}</p>
+        <p><strong>Customer:</strong> {{ sale.CustomerFirstName }} {{ sale.CustomerLastName }}</p>
+        <p><strong>Total Revenue:</strong> ${{ sale.TotalRevenue }}</p>
+        <p><strong>Sale Date:</strong> {{ sale.SaleDate }}</p>
+    </div>
+
+    <div class="products-table-container">
+        <h3>Products</h3>
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Quantity</th>
+                    <th>Price Per Unit</th>
+                    <th>Total Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.ProductName }}</td>
+                    <td>{{ product.Quantity }}</td>
+                    <td>${{ product.SellingPrice }}</td>
+                    <td>${{ product.TotalCost }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="back-button-container">
+        <a href="/sales/{{ sale.CompanyId }}" class="btn back-btn">Back to Sales</a>
+    </div>
+</div>
+{% endblock %}

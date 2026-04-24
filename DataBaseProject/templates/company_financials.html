@@ -1,0 +1,97 @@
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card" style="max-width: 680px; margin: 2rem auto;">
+    <h2>Branch Financial Overview</h2>
+    <form method="get">
+        <label for="company_id">Branch:</label>
+        <select name="company_id" id="company_id" onchange="this.form.submit()" required>
+            <option value="">-- Select Branch --</option>
+            {% for company in companies %}
+                <option value="{{ company.CompanyId }}" {% if company.CompanyId|string == company_id %}selected{% endif %}>
+                    {{ company.CompanyName }}
+                </option>
+            {% endfor %}
+        </select>
+        {% if company_id %}
+            <div style="margin-top: 18px;">
+                <label for="start_date">Start Date:</label>
+                <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
+                <label for="end_date" style="margin-left:12px;">End Date:</label>
+                <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
+                <button type="submit" class="btn filter-btn">Apply</button>
+            </div>
+        {% endif %}
+    </form>
+</div>
+
+{% if selected_company and financials %}
+<div class="card" style="max-width: 680px; margin: 2rem auto; margin-bottom:1.5rem;">
+    <h3>{{ selected_company.CompanyName }} - Financials</h3>
+    <div style="display:flex; gap:28px; margin-top:18px;">
+        <div class="financial-card">
+            <h4>Total Revenue</h4>
+            <p>${{ financials.TotalRevenue }}</p>
+        </div>
+        <div class="financial-card">
+            <h4>Total Expenditure</h4>
+            <p>${{ financials.TotalExpenditure }}</p>
+        </div>
+        <div class="financial-card">
+            <h4>Profit</h4>
+            <p>${{ financials.Profit }}</p>
+        </div>
+    </div>
+</div>
+{% if company_employees_salary %}
+<div class="card" style="max-width: 680px; margin: 2rem auto;">
+    <h3>Company Employee Summary</h3>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Total Employees</th>
+                <th>Total Monthly Salary Paid</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in company_employees_salary %}
+            <tr>
+                <td>{{ row.CompanyName }}</td>
+                <td>{{ row.TotalEmployees }}</td>
+                <td>${{ row.TotalMonthlySalaries }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+<div class="card" style="max-width: 680px; margin: 0 auto;">
+    <h3>Low Stock Products</h3>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Current Stock</th>
+                <th>Reorder Recommendation</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for product in low_stock_products %}
+            <tr>
+                <td>{{ product.ProductName }}</td>
+                <td>{{ product.QuantityInStock }}</td>
+                <td>{% if product.QuantityInStock <= 5 %}Yes{% else %}No{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if low_stock_products|length == 0 %}
+    <div style="text-align:center;color:#8d98aa;padding:12px 0;">All products are sufficiently stocked.</div>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+

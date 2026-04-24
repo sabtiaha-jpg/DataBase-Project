@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Purchases - {{ branch.CompanyName }}{% endblock %}
+
+{% block content %}
+<div class="branch-container">
+    <aside class="sidebar">
+        <ul>
+            <li><a href="/branch/{{ branch.CompanyId }}">Dashboard</a></li>
+            <li><a href="/departments/{{ branch.CompanyId }}">Departments</a></li>
+            <li><a href="/products/{{ branch.CompanyId }}">Products</a></li>
+            <li><a href="/purchase/{{ branch.CompanyId }}">Purchases</a></li>
+            <li><a href="/sales/{{ branch.CompanyId }}">Sales</a></li>
+        </ul>
+        </ul>
+    </aside>
+    <main class="branch-main">
+        <div class="page-header1">
+            <h2 class="page-title">Purchases for {{ branch.CompanyName }}</h2>
+            <a href="/add_purchase/{{ branch.CompanyId }}" class="btn add-btn">+ Add Purchase</a>
+        </div>
+        <div class="table-container">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Purchase ID</th>
+                        <th>Purchase Date</th>
+                        <th>Supplier</th>
+                        <th>Total Cost</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for purchase in purchases %}
+                    <tr>
+                        <td>{{ purchase.PurchaseId }}</td>
+                        <td>{{ purchase.PurchaseDate }}</td>
+                        <td>{{ purchase.SupplierCompany }}</td>
+                        <td>${{ purchase.TotalCost }}</td>
+                        <td>
+                            <a href="/purchase_details/{{ purchase.PurchaseId }}" class="btn view-btn">View Details</a>
+                            <a href="/delete_purchase/{{ purchase.PurchaseId }}" class="btn delete-btn">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+{% endblock %}

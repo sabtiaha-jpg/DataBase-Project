@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ branch.CompanyName }} - Management{% endblock %}
+
+{% block content %}
+<div class="branch-container">
+    {% include "partials/sidebar.html" %}
+    <main class="branch-main">
+        <h2>{{ branch.CompanyName }} - Management</h2>
+        <p>
+            Welcome to the management dashboard for {{ branch.CompanyName }}.
+            Use the sidebar to navigate through the available options such as products, employees, purchases, and reports.
+        </p>
+    </main>
+</div>
+{% endblock %}

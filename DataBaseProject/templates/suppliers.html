@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Suppliers{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">Suppliers</h2>
+    <button class="btn add-btn" onclick="openAddModal()">+ Add Supplier</button>
+</div>
+
+<head>
+    <script>
+        function openAddModal() {
+            document.getElementById('addSupplierModal').style.display = 'flex';
+        }
+
+        function closeAddModal() {
+            document.getElementById('addSupplierModal').style.display = 'none';
+        }
+
+        function openEditModal(id, company, contactName, phone, email, address, website, supplierType) {
+            document.getElementById('editSupplierId').value = id;
+            document.getElementById('editSupplierCompany').value = company;
+            document.getElementById('editContactName').value = contactName;
+            document.getElementById('editPhoneNumber').value = phone;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editAddress').value = address;
+            document.getElementById('editWebsite').value = website;
+            document.getElementById('editSupplierType').value = supplierType;
+            document.getElementById('editSupplierModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editSupplierModal').style.display = 'none';
+        }
+
+        window.onclick = function (event) {
+            if (event.target.classList.contains('modal')) {
+                closeAddModal();
+                closeEditModal();
+            }
+        }
+    </script>
+</head>
+
+<div class="search-container">
+    <label for="search-box">Search Suppliers:</label>
+    <input type="text" id="search-box" placeholder="Type to search...">
+</div>
+
+<script>
+    document.getElementById('search-box').addEventListener('input', function () {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.styled-table tbody tr');
+
+        rows.forEach(row => {
+            const company = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            const contact = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+            const contactNumber = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+            const email = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+
+            if (
+                company.includes(searchValue) ||
+                contact.includes(searchValue) ||
+                contactNumber.includes(searchValue) ||
+                email.includes(searchValue)
+            ) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+<div class="table-container">
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Supplier ID</th>
+                <th>Company</th>
+                <th>Contact Name</th>
+                <th>Phone Number</th>
+                <th>Email</th>
+                <th>Website</th>
+                <th>Supplier Type</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for supplier in suppliers %}
+            <tr>
+                <td>{{ supplier.SupplierId }}</td>
+                <td>{{ supplier.SupplierCompany }}</td>
+                <td>{{ supplier.ContactName }}</td>
+                <td>{{ supplier.PhoneNumber }}</td>
+                <td>{{ supplier.Email }}</td>
+                <td>{{ supplier.Website }}</td>
+                <td>{{ supplier.SupplierTypeName }}</td>
+                <td>
+                    <button class="btn edit-btn" onclick="openEditModal(
+                        '{{ supplier.SupplierId }}', 
+                        '{{ supplier.SupplierCompany }}', 
+                        '{{ supplier.ContactName }}', 
+                        '{{ supplier.PhoneNumber }}', 
+                        '{{ supplier.Email }}', 
+                        '{{ supplier.Address }}', 
+                        '{{ supplier.Website }}', 
+                        '{{ supplier.SupplierType }}'
+                    )">Edit</button>
+                    <a href="/delete_supplier/{{ supplier.SupplierId }}" class="btn delete-btn">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div id="addSupplierModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAddModal()">&times;</span>
+        <h3>Add Supplier</h3>
+        <form method="POST" action="/add_supplier">
+           <label for="supplier_company">Company Name:</label>
+            <input type="text" name="supplier_company" required>
+            <label for="contact_name">Contact Name:</label>
+            <input type="text" name="contact_name" required><br>
+            <label for="phone">Phone Number:</label>
+            <input type="text" name="phone" required><br>
+            <label for="email">Email:</label>
+            <input type="email" name="email" required><br>
+            <label for="address">Address:</label>
+            <input type="text" name="address" required><br>
+            <label for="website">Website:</label>
+            <input type="text" name="website" required><br>
+            <label for="supplier_type">Supplier Type:</label>
+            <select name="supplier_type" id="editSupplierType" required>
+                {% for type in supplier_types %}
+                <option value="{{ type.SupplierTypeId }}">{{ type.TypeName }}</option>
+                {% endfor %}
+            </select>
+
+
+            <button type="submit" class="btn save-btn">Add</button>
+        </form>
+    </div>
+</div>
+
+<div id="editSupplierModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h3>Edit Supplier</h3>
+        <form method="POST" action="/edit_supplier">
+            <input type="hidden" name="supplier_id" id="editSupplierId">
+            <label for="company">Company Name:</label>
+            <input type="text" name="company" id="editSupplierCompany" required><br>
+            <label for="contact_name">Contact Name:</label>
+            <input type="text" name="contact_name" id="editContactName" required><br>
+            <label for="phone">Phone Number:</label>
+            <input type="text" name="phone" id="editPhoneNumber" required><br>
+            <label for="email">Email:</label>
+            <input type="email" name="email" id="editEmail" required><br>
+            <label for="address">Address:</label>
+            <input type="text" name="address" id="editAddress" required><br>
+            <label for="website">Website:</label>
+            <input type="text" name="website" id="editWebsite" required><br>
+            <label for="supplier_type">Supplier Type:</label>
+            <select name="supplier_type" id="editSupplierType" required>
+                {% for type in supplier_types %}
+                <option value="{{ type.SupplierTypeId }}">{{ type.TypeName }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn save-btn">Save</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+{% block title %}Employees{% endblock %}
+
+{% block content %}
+<div class="branch-container">
+    <aside class="sidebar">
+        <ul>
+            <li><a href="/branch/{{ department.CompanyId }}">Dashboard</a></li>
+            <li><a href="/departments/{{ department.CompanyId }}">Departments</a></li>
+            <li><a href="/products/{{ department.CompanyId }}">Products</a></li>
+            <li><a href="/purchase/{{ department.CompanyId }}">Purchases</a></li>
+            <li><a href="/sales/{{ department.CompanyId }}">Sales</a></li>
+        </ul>
+        </ul>
+    </aside>
+
+    <main class="branch-main">
+        <div class="page-header">
+            <h2 class="page-title">Employees for {{ department.DepartmentName }}</h2>
+            <button class="btn add-btn" onclick="openAddEmployeeModal()">+ Add Employee</button>
+        </div>
+
+        <div class="table-container">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Phone Number</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees %}
+                    <tr>
+                        <td>{{ employee.EmployeeId }}</td>
+                        <td>{{ employee.FirstName }}</td>
+                        <td>{{ employee.LastName }}</td>
+                        <td>{{ employee.Email }}</td>
+                        <td>{{ employee.PhoneNumber }}</td>
+                        <td>
+                            <button class="btn edit-btn" onclick="openEditEmployeeModal(
+                                '{{ employee.EmployeeId }}',
+                                '{{ employee.FirstName }}',
+                                '{{ employee.LastName }}',
+                                '{{ employee.Email }}',
+                                '{{ employee.PhoneNumber }}',
+                                '{{ employee.Address }}',
+                                '{{ employee.Gender }}',
+                                '{{ employee.DateOfHire }}',
+                                '{{ employee.DateOfBirth }}',
+                                '{{ employee.Salary }}',
+                                '{{ employee.Position }}',
+                                '{{ employee.WorkHours }}',
+                            )">Edit</button>
+                            <a href="/delete_employee/{{ employee.EmployeeId }}/{{ department.DepartmentId }}" class="btn delete-btn">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+<!-- Add Modal -->
+<div id="addEmployeeModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAddEmployeeModal()">&times;</span>
+        <h3 style="text-align:center;margin-bottom:18px;">Add Employee</h3>
+        <form method="POST" action="/add_employee/{{ department.DepartmentId }}">
+            <div class="form-row">
+                <div>
+                    <label>First Name:</label>
+                    <input type="text" name="first_name" required>
+                </div>
+                <div>
+                    <label>Last Name:</label>
+                    <input type="text" name="last_name" required>
+                </div>
+            </div>
+            <label>Email:</label>
+            <input type="email" name="email" required>
+
+            <label>Phone Number:</label>
+            <input type="text" name="phone_number" required>
+
+            <label>Address:</label>
+            <input type="text" name="address" required>
+
+            <label>Gender:</label>
+            <select name="gender" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+
+            <div class="form-row">
+                <div>
+                    <label>Date of Hire:</label>
+                    <input type="date" name="date_of_hire" required>
+                </div>
+                <div>
+                    <label>Date of Birth:</label>
+                    <input type="date" name="date_of_birth" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label>Salary:</label>
+                    <input type="number" step="0.01" name="salary" required>
+                </div>
+                <div>
+                    <label>Work Hours:</label>
+                    <input type="number" name="work_hours" value="8" required>
+                </div>
+            </div>
+            <label>Position:</label>
+            <input type="text" name="position" required>
+            <button type="submit" class="btn save-btn">Add</button>
+        </form>
+    </div>
+</div>
+
+
+<!-- Edit Modal -->
+<div id="editEmployeeModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditEmployeeModal()">&times;</span>
+        <h3 style="text-align:center;margin-bottom:18px;">Edit Employee</h3>
+        <form method="POST" action="/edit_employee">
+            <input type="hidden" name="employee_id" id="editEmployeeId">
+            <input type="hidden" name="department_id" value="{{ department.DepartmentId }}">
+            <div class="form-row">
+                <div>
+                    <label>First Name:</label>
+                    <input type="text" name="first_name" id="editFirstName" required>
+                </div>
+                <div>
+                    <label>Last Name:</label>
+                    <input type="text" name="last_name" id="editLastName" required>
+                </div>
+            </div>
+            <label>Email:</label>
+            <input type="email" name="email" id="editEmail" required>
+
+            <label>Phone Number:</label>
+            <input type="text" name="phone_number" id="editPhoneNumber" required>
+
+            <label>Address:</label>
+            <input type="text" name="address" id="editAddress" required>
+
+            <label>Gender:</label>
+            <select name="gender" id="editGender" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+
+            <div class="form-row">
+                <div>
+                    <label>Date of Hire:</label>
+                    <input type="date" name="date_of_hire" id="editDateOfHire" required>
+                </div>
+                <div>
+                    <label>Date of Birth:</label>
+                    <input type="date" name="date_of_birth" id="editDateOfBirth" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label>Salary:</label>
+                    <input type="number" name="salary" id="editSalary" min="0" required>
+                </div>
+                <div>
+                    <label>Work Hours:</label>
+                    <input type="number" name="work_hours" id="editWorkHours" min="0" required>
+                </div>
+            </div>
+            <label>Position:</label>
+            <input type="text" name="position" id="editPosition" required>
+            <button type="submit" class="btn save-btn">Save</button>
+        </form>
+    </div>
+</div>
+
+    </main>
+</div>
+
+<script>
+    function openAddEmployeeModal() {
+        document.getElementById('addEmployeeModal').style.display = 'flex';
+    }
+
+    function closeAddEmployeeModal() {
+        document.getElementById('addEmployeeModal').style.display = 'none';
+    }
+
+    function openEditEmployeeModal(id, firstName, lastName, email, phoneNumber, address, gender, dateOfHire, dateOfBirth, salary, position, workHours) {
+        document.getElementById('editEmployeeId').value = id;
+        document.getElementById('editFirstName').value = firstName;
+        document.getElementById('editLastName').value = lastName;
+        document.getElementById('editEmail').value = email;
+        document.getElementById('editPhoneNumber').value = phoneNumber;
+        document.getElementById('editAddress').value = address;
+        document.getElementById('editGender').value = gender;
+        document.getElementById('editDateOfHire').value = dateOfHire;
+        document.getElementById('editDateOfBirth').value = dateOfBirth;
+        document.getElementById('editSalary').value = salary;
+        document.getElementById('editPosition').value = position;
+        document.getElementById('editWorkHours').value = workHours;
+        document.getElementById('editEmployeeModal').style.display = 'flex';
+    }
+
+    function closeEditEmployeeModal() {
+        document.getElementById('editEmployeeModal').style.display = 'none';
+    }
+
+    window.onclick = function (event) {
+        if (event.target.classList.contains('modal')) {
+            closeAddEmployeeModal();
+            closeEditEmployeeModal();
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Add Purchase - {{ branch.CompanyName }}{% endblock %}
+
+{% block content %}
+<div class="branch-container">
+    {% include "partials/sidebar.html" %}
+    <main class="branch-main">
+        <div class="page-header">
+            <h2 class="page-title">Add Purchase for {{ branch.CompanyName }}</h2>
+        </div>
+
+        <div class="form-container">
+            <form method="POST" action="/add_purchase/{{ branch.CompanyId }}">
+                <div class="form-group">
+                    <label for="supplier_id">Select Supplier:</label>
+                    <select name="supplier_id" required class="supplier-select">
+                        <option value="">-- Select Supplier --</option>
+                        {% for supplier in suppliers %}
+                            <option value="{{ supplier.SupplierId }}">{{ supplier.SupplierCompany }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <h3>Products</h3>
+                <div id="product-container">
+                    <div class="product-row">
+                        <div class="product-field">
+                            <label for="product_id">Product:</label>
+                            <select name="product_id" class="product-select" onchange="updateCost(this)" required>
+                                <option value="">-- Select Product --</option>
+                                {% for product in products %}
+                                    <option value="{{ product.ProductId }}" data-cost="{{ product.CostPrice }}">{{ product.ProductName }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="quantity-field">
+                            <label for="quantity">Quantity:</label>
+                            <input type="number" name="quantity" min="1" oninput="updateTotal(this)" required>
+                        </div>
+                        <div class="cost-field">
+                            <label for="cost">Cost Per Unit:</label>
+                            <input type="number" name="cost" class="cost-input" step="0.01" readonly>
+                        </div>
+                        <div class="total-cost-field">
+                            <label for="total_cost">Total Cost:</label>
+                            <input type="number" name="total_cost" class="total-cost-input" step="0.01" readonly>
+                        </div>
+                        <button type="button" class="remove-row-btn" onclick="removeProductRow(this)">Remove</button>
+                    </div>
+                </div>
+
+                <button type="button" class="btn add-btn" onclick="addProductRow()">Add Another Product</button><br>
+                <button type="submit" class="btn save-btn">Save Purchase</button>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script>
+    function addProductRow() {
+        const productContainer = document.getElementById("product-container");
+        const newRow = document.createElement("div");
+        newRow.classList.add("product-row");
+        newRow.innerHTML = `
+            <div class="product-field">
+                <label for="product_id">Product:</label>
+                <select name="product_id" class="product-select" onchange="updateCost(this)" required>
+                    <option value="">-- Select Product --</option>
+                    {% for product in products %}
+                        <option value="{{ product.ProductId }}" data-cost="{{ product.CostPrice }}">{{ product.ProductName }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="quantity-field">
+                <label for="quantity">Quantity:</label>
+                <input type="number" name="quantity" min="1" oninput="updateTotal(this)" required>
+            </div>
+            <div class="cost-field">
+                <label for="cost">Cost Per Unit:</label>
+                <input type="number" name="cost" class="cost-input" step="0.01" readonly>
+            </div>
+            <div class="total-cost-field">
+                <label for="total_cost">Total Cost:</label>
+                <input type="number" name="total_cost" class="total-cost-input" step="0.01" readonly>
+            </div>
+            <button type="button" class="remove-row-btn" onclick="removeProductRow(this)">Remove</button>
+        `;
+        productContainer.appendChild(newRow);
+    }
+
+    function removeProductRow(button) {
+        const row = button.parentElement;
+        row.remove();
+    }
+
+    function updateCost(selectElement) {
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        const costInput = selectElement.closest('.product-row').querySelector('.cost-input');
+        const quantityInput = selectElement.closest('.product-row').querySelector('[name="quantity"]');
+        const totalCostInput = selectElement.closest('.product-row').querySelector('.total-cost-input');
+
+        const costValue = selectedOption.getAttribute('data-cost') || "0.00";
+        costInput.value = parseFloat(costValue).toFixed(2);
+
+        const quantity = parseFloat(quantityInput.value) || 1;
+        totalCostInput.value = (quantity * parseFloat(costValue)).toFixed(2);
+        quantityInput.value = 1;
+    }
+
+    function updateTotal(quantityInput) {
+        const row = quantityInput.closest('.product-row');
+        const costInput = row.querySelector('.cost-input');
+        const totalCostInput = row.querySelector('.total-cost-input');
+
+        const quantity = parseFloat(quantityInput.value) || 0;
+        const cost = parseFloat(costInput.value) || 0;
+
+        totalCostInput.value = (quantity * cost).toFixed(2);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Sales - {{ branch.CompanyName }}{% endblock %}
+
+{% block content %}
+
+<div class="branch-container">
+    <aside class="sidebar">
+        <ul>
+            <li><a href="/branch/{{ branch.CompanyId }}">Dashboard</a></li>
+            <li><a href="/departments/{{ branch.CompanyId }}">Departments</a></li>
+            <li><a href="/products/{{ branch.CompanyId }}">Products</a></li>
+            <li><a href="/purchase/{{ branch.CompanyId }}">Purchases</a></li>
+            <li><a href="/sales/{{ branch.CompanyId }}">Sales</a></li>
+        </ul>
+    </aside>
+    <main class="branch-main">
+        <div class="page-header1">
+            <h2 class="page-title">Sales for {{ branch.CompanyName }}</h2>
+            <a href="/add_sale/{{ branch.CompanyId }}" class="btn add-btn">+ Add Sale</a>
+        </div>
+
+        <div class="search-container">
+            <label for="search-box">Search by Customer Name:</label>
+            <input type="text" id="search-box" placeholder="Type customer name...">
+        </div>
+
+        <script>
+            document.getElementById('search-box').addEventListener('input', function () {
+                const searchValue = this.value.toLowerCase();
+                const rows = document.querySelectorAll('.styled-table tbody tr');
+
+                rows.forEach(row => {
+                    const customerName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+
+                    if (customerName.includes(searchValue)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        </script>
+
+        <div class="table-container">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Sale ID</th>
+                        <th>Customer</th>
+                        <th>Total Revenue</th>
+                        <th>Sale Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                    <tr>
+                        <td>{{ sale.SaleId }}</td>
+                        <td>{{ sale.CustomerFirstName }} {{ sale.CustomerLastName }}</td>
+                        <td>${{ sale.TotalRevenue }}</td>
+                        <td>{{ sale.SaleDate }}</td>
+                        <td>
+                            <a href="/sale_details/{{ sale.SaleId }}" class="btn view-btn">View Details</a>
+                            <a href="/delete_sale/{{ sale.SaleId }}" class="btn delete-btn">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+{% endblock %}

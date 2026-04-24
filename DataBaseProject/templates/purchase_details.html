@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Purchase Details - Purchase #{{ purchase.PurchaseId }}{% endblock %}
+
+{% block content %}
+<div class="details-container">
+    <div class="details-header">
+        <h2>Purchase Details</h2>
+        <p><strong>Purchase ID:</strong> {{ purchase.PurchaseId }}</p>
+        <p><strong>Supplier:</strong> {{ purchase.SupplierCompany }}</p>
+        <p><strong>Total Cost:</strong> ${{ purchase.TotalCost }}</p>
+        <p><strong>Purchase Date:</strong> {{ purchase.PurchaseDate }}</p>
+    </div>
+
+    <div class="products-table-container">
+        <h3>Products</h3>
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Quantity</th>
+                    <th>Cost Per Unit</th>
+                    <th>Total Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.ProductName }}</td>
+                    <td>{{ product.Quantity }}</td>
+                    <td>${{ product.CostPerUnit }}</td>
+                    <td>${{ product.TotalCost }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="back-button-container">
+        <a href="/purchase/{{ purchase.CompanyId }}" class="btn back-btn">Back to Purchases</a>
+    </div>
+</div>
+{% endblock %}

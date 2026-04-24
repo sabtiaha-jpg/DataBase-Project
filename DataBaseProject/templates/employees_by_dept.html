@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+/* --- Employees by Department Custom Styling --- */
+.emp-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 28px rgba(30,58,138,0.08);
+    padding: 36px 30px 28px 30px;
+    margin-bottom: 34px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.emp-form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 26px 38px;
+    align-items: center;
+    margin-bottom: 18px;
+}
+.emp-form-row label {
+    font-weight: 500;
+    color: #1e3a8a;
+    margin-right: 10px;
+    font-size: 1.09rem;
+}
+.emp-form-row select {
+    border: 1.5px solid #b6c6e5;
+    border-radius: 9px;
+    padding: 8px 16px;
+    font-size: 1.09rem;
+    min-width: 210px;
+    background: #f9fafb;
+    margin-right: 18px;
+    transition: border 0.2s;
+}
+.emp-form-row select:focus {
+    border: 1.5px solid #1e3a8a;
+    background: #fff;
+}
+.emp-form-row button {
+    background: #1e3a8a;
+    color: #fff;
+    font-weight: 700;
+    padding: 10px 32px;
+    border-radius: 9px;
+    border: none;
+    cursor: pointer;
+    font-size: 1.12rem;
+    margin-left: 8px;
+    transition: background 0.15s;
+}
+.emp-form-row button:hover { background: #2653a5; }
+
+/* Responsive */
+@media (max-width: 900px) {
+    .emp-card { padding: 18px 8px 18px 8px; }
+    .emp-form-row { flex-direction: column; gap: 12px; align-items: stretch; }
+    .emp-form-row select { min-width: unset; }
+}
+@media (max-width: 600px) {
+    .emp-card { padding: 6px 0 12px 0; }
+}
+
+.emp-section-title {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: #1e3a8a;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    margin-top: 22px;
+}
+
+.styled-table {
+    border-collapse: collapse;
+    font-size: 1.05rem;
+    min-width: 1000px;
+    width: 100%;
+    background: #f8fafd;
+    border-radius: 14px;
+    box-shadow: 0 1px 7px rgba(30,58,138,0.04);
+    overflow: hidden;
+}
+.styled-table thead tr {
+    background-color: #1e3a8a;
+    color: #fff;
+    text-align: left;
+    font-weight: bold;
+    font-size: 1.08rem;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+.styled-table th, .styled-table td {
+    padding: 13px 16px;
+    border-bottom: 1px solid #e6e6e6;
+}
+.styled-table tbody tr:hover {
+    background-color: #e3e9f8;
+}
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #1e3a8a;
+}
+.emp-no-data {
+    text-align: center;
+    color: #a9a9a9;
+    font-size: 1.14rem;
+    margin: 32px 0 0 0;
+    padding: 26px 0;
+}
+</style>
+
+<div class="emp-card">
+    <div class="emp-section-title">Employees by Department</div>
+    <form method="get" action="{{ url_for('employees_by_dept') }}">
+        <div class="emp-form-row">
+            <!-- Company Dropdown -->
+            <label for="company">Company:</label>
+            <select name="company_id" id="company" onchange="this.form.submit()" required>
+                <option value="">-- Select Company --</option>
+                {% for company in companies %}
+                    <option value="{{ company.CompanyId }}" {% if company.CompanyId|string == selected_company_id %}selected{% endif %}>
+                        {{ company.CompanyName }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            {% if selected_company_id %}
+                <label for="department">Department:</label>
+                <select name="department_id" id="department" onchange="this.form.submit()" required>
+                    <option value="">-- Select Department --</option>
+                    {% for dept in departments %}
+                        <option value="{{ dept.DepartmentId }}" {% if dept.DepartmentId|string == selected_department_id %}selected{% endif %}>
+                            {{ dept.DepartmentName }}
+                        </option>
+                    {% endfor %}
+                </select>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+{% if employees %}
+<div class="emp-card" style="margin-top: 12px;">
+    <div class="emp-section-title" style="font-size:1.35rem; margin-bottom:0.6rem;">Employees</div>
+    <div class="table-wrapper">
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Gender</th>
+                    <th>Date of Hire</th>
+                    <th>Date of Birth</th>
+                    <th>Salary</th>
+                    <th>Address</th>
+                    <th>Branch</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for emp in employees %}
+                <tr>
+                    <td>{{ emp.EmployeeId }}</td>
+                    <td>{{ emp.Name }}</td>
+                    <td>{{ emp.Email or '-' }}</td>
+                    <td>{{ emp.PhoneNumber or '-' }}</td>
+                    <td>{{ emp.Gender or '-' }}</td>
+                    <td>{{ emp.DateOfHire }}</td>
+                    <td>{{ emp.DateOfBirth }}</td>
+                    <td>{{ emp.Salary }}</td>
+                    <td>{{ emp.Address or '-' }}</td>
+                    <td>{{ emp.CompanyName }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% elif selected_department_id %}
+<div class="emp-card emp-no-data">
+    No employees found for this department.
+</div>
+{% endif %}
+{% endblock %}

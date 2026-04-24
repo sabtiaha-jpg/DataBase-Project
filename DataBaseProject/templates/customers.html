@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Customers{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">Customers</h2>
+    <button class="btn add-btn" onclick="openAddModal()">+ Add Customer</button>
+</div>
+
+<div class="search-container">
+    <label for="search-box">Search Customers:</label>
+    <input type="text" id="search-box" placeholder="Type to search...">
+</div>
+
+<div class="table-container">
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Customer ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Contact Number</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td>{{ customer.CustomerId }}</td>
+                <td>{{ customer.FirstName }}</td>
+                <td>{{ customer.LastName }}</td>
+                <td>{{ customer.ContactNumber }}</td>
+                <td>{{ customer.Email }}</td>
+                <td>
+                    <button class="btn edit-btn" onclick="openEditModal('{{ customer.CustomerId }}', '{{ customer.FirstName }}', '{{ customer.LastName }}', '{{ customer.ContactNumber }}', '{{ customer.Email }}', '{{ customer.ShippingAddress }}', '{{ customer.CustomerTypeId }}', '{{ customer.PaymentMethodId }}')">Edit</button>
+                    <a href="/delete_customer/{{ customer.CustomerId }}" class="btn delete-btn">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Modal -->
+<div id="addCustomerModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAddModal()">&times;</span>
+        <h3>Add Customer</h3>
+        <form method="POST" action="/add_customer">
+            <label>First Name:</label>
+            <input type="text" name="first_name" required><br>
+            <label>Last Name:</label>
+            <input type="text" name="last_name" required><br>
+            <label>Contact Number:</label>
+            <input type="text" name="contact" required><br>
+            <label>Email:</label>
+            <input type="email" name="email" required><br>
+            <label>Shipping Address:</label>
+            <input type="text" name="address"><br>
+            <label>Customer Type:</label>
+            <select name="customer_type" required>
+                {% for type in customer_types %}
+                <option value="{{ type.CustomerTypeId }}">{{ type.TypeName }}</option>
+                {% endfor %}
+            </select><br>
+            <label>Payment Method:</label>
+            <select name="payment_method" required>
+                {% for method in payment_methods %}
+                <option value="{{ method.MethodId }}">{{ method.MethodName }}</option>
+                {% endfor %}
+            </select><br>
+            <button type="submit" class="btn save-btn">Add</button>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editCustomerModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h3>Edit Customer</h3>
+        <form method="POST" action="/edit_customer">
+            <input type="hidden" name="customer_id" id="editCustomerId">
+            <label>First Name:</label>
+            <input type="text" name="first_name" id="editFirstName" required><br>
+            <label>Last Name:</label>
+            <input type="text" name="last_name" id="editLastName" required><br>
+            <label>Contact Number:</label>
+            <input type="text" name="contact" id="editContact" required><br>
+            <label>Email:</label>
+            <input type="email" name="email" id="editEmail" required><br>
+            <label>Shipping Address:</label>
+            <input type="text" name="address" id="editAddress"><br>
+            <label>Customer Type:</label>
+            <select name="customer_type" id="editCustomerType" required>
+                {% for type in customer_types %}
+                <option value="{{ type.CustomerTypeId }}">{{ type.TypeName }}</option>
+                {% endfor %}
+            </select><br>
+            <label>Payment Method:</label>
+            <select name="payment_method" id="editPaymentMethod" required>
+                {% for method in payment_methods %}
+                <option value="{{ method.MethodId }}">{{ method.MethodName }}</option>
+                {% endfor %}
+            </select><br>
+            <button type="submit" class="btn save-btn">Save</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openAddModal() {
+        document.getElementById('addCustomerModal').style.display = 'flex';
+    }
+    function closeAddModal() {
+        document.getElementById('addCustomerModal').style.display = 'none';
+    }
+    function openEditModal(id, firstName, lastName, contact, email, address, customerType, paymentMethod) {
+        document.getElementById('editCustomerId').value = id;
+        document.getElementById('editFirstName').value = firstName;
+        document.getElementById('editLastName').value = lastName;
+        document.getElementById('editContact').value = contact;
+        document.getElementById('editEmail').value = email;
+        document.getElementById('editAddress').value = address;
+        document.getElementById('editCustomerType').value = customerType;
+        document.getElementById('editPaymentMethod').value = paymentMethod;
+        document.getElementById('editCustomerModal').style.display = 'flex';
+    }
+    function closeEditModal() {
+        document.getElementById('editCustomerModal').style.display = 'none';
+    }
+    window.onclick = function (event) {
+        if (event.target.classList.contains('modal')) {
+            closeAddModal();
+            closeEditModal();
+        }
+    };
+    document.getElementById('search-box').addEventListener('input', function () {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.styled-table tbody tr');
+        rows.forEach(row => {
+            const firstName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            const lastName = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+            const contactNumber = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+            const email = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+            if (firstName.includes(searchValue) || lastName.includes(searchValue) || contactNumber.includes(searchValue) || email.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}
